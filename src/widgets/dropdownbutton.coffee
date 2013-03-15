@@ -24,28 +24,28 @@
       target.hide()
       @button = @_prepareButton() unless @button
 
-      @button.bind 'click', =>
+      @button.on 'click', =>
         if target.hasClass 'open'
           @_hideTarget()
           return
         @_showTarget()
 
-      target.bind 'click', =>
+      target.on 'click', =>
         @_hideTarget()
 
-      @options.editable.element.bind 'hallodeactivated', =>
+      @options.editable.element.on 'hallodeactivated', =>
         @_hideTarget()
 
       @element.append @button
 
     _showTarget: ->
-      target = jQuery @options.target   
+      target = jQuery @options.target
       @_updateTargetPosition()
       target.addClass 'open'
       target.show()
     
     _hideTarget: ->
-      target = jQuery @options.target     
+      target = jQuery @options.target
       target.removeClass 'open'
       target.hide()
 
@@ -58,12 +58,18 @@
 
     _prepareButton: ->
       id = "#{@options.uuid}-#{@options.label}"
-      buttonEl = jQuery """<button id=\"#{id}\" data-toggle=\"dropdown\" data-target=\"##{@options.target.attr('id')}\" title=\"#{@options.label}\">
-          <span class="ui-button-text"><i class=\"#{@options.icon}\"></i></span>
-        </button>"""
+      classes = [
+        'ui-button'
+        'ui-widget'
+        'ui-state-default'
+        'ui-corner-all'
+        'ui-button-text-only'
+      ]
+      buttonEl = jQuery "<button id=\"#{id}\"
+       class=\"#{classes.join(' ')}\" title=\"#{@options.label}\">
+       <span class=\"ui-button-text\"><i class=\"#{@options.icon}\"></i></span>
+       </button>"
       buttonEl.addClass @options.cssClass if @options.cssClass
-
-      button = buttonEl.button()
-      button
+      buttonEl
 
 )(jQuery)

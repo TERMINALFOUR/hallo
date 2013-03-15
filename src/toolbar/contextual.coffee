@@ -4,13 +4,14 @@
 #
 #     Contextual toolbar plugin
 ((jQuery) ->
-  jQuery.widget 'Hallo.halloToolbarContextual',
+  jQuery.widget 'IKS.halloToolbarContextual',
     toolbar: null
 
     options:
       parentElement: 'body'
       editable: null
       toolbar: null
+      positionAbove: false
 
     _create: ->
       @toolbar = @options.toolbar
@@ -24,12 +25,13 @@
     _getPosition: (event, selection) ->
       return unless event
       eventType = event.type
-      if eventType == "keydown" || eventType == "keyup" || eventType == "keypress"
-        return @_getCaretPosition selection
-      if eventType == "click" || eventType == "mousedown" || eventType == "mouseup"
-        return position =
-          top: event.pageY
-          left: event.pageX
+      switch eventType
+        when 'keydown', 'keyup', 'keypress'
+          return @_getCaretPosition selection
+        when 'click', 'mousedown', 'mouseup'
+          return position =
+            top: event.pageY
+            left: event.pageX
 
     _getCaretPosition: (range) ->
       tmpSpan = jQuery "<span/>"
@@ -54,24 +56,47 @@
       @toolbar.css 'top', @element.offset().top - 20
       @toolbar.css 'left', @element.offset().left
 
-    _updatePosition: (position) ->
+    _updatePosition: (position, selection=null) ->
       return unless position
       return unless position.top and position.left
-      @toolbar.css 'top', position.top
-      @toolbar.css 'left', position.left
+
+      # In case there is a selection, move toolbar on top of it and align with
+      # start of selection.
+      # Else move it on top of current position, center it and move
+      # it slightly to the right.
+      toolbar_height_offset = this.toolbar.outerHeight() + 10
+      if selection and !selection.collapsed and selection.nativeRange
+        selectionRect = selection.nativeRange.getBoundingClientRect()
+        if this.options.positionAbove
+          top_offset = selectionRect.top - toolbar_height_offset
+        else
+          top_offset = selectionRect.bottom + 10
+
+        top = jQuery(window).scrollTop() + top_offset
+        left = jQuery(window).scrollLeft() + selectionRect.left
+      else
+        if this.options.positionAbove
+          top_offset = -10 - toolbar_height_offset
+        else
+          top_offset = 20
+        top = position.top + top_offset
+        left = position.left - @toolbar.outerWidth() / 2 + 30
+      @toolbar.css 'top', top
+      @toolbar.css 'left', left
 
     _bindEvents: ->
       # catch select -> show (and reposition?)
-      @element.bind 'halloselected', (event, data) =>
+      @element.on 'halloselected', (event, data) =>
         position = @_getPosition data.originalEvent, data.selection
         return unless position
-        @_updatePosition position
-        @toolbar.show()
+        @_updatePosition position, data.selection
+        if @toolbar.html() != ''
+          @toolbar.show()
 
       # catch deselect -> hide
-      @element.bind 'hallounselected', (event, data) =>
+      @element.on 'hallounselected', (event, data) =>
         @toolbar.hide()
 
-      @element.bind 'hallodeactivated', (event, data) =>
+      @element.on 'hallodeactivated', (event, data) =>
         @toolbar.hide()
 ) jQuery

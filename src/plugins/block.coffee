@@ -21,17 +21,20 @@
       buttonset = jQuery "<span class=\"#{@widgetName}\"></span>"
       contentId = "#{@options.uuid}-#{@widgetName}-data"
       target = @_prepareDropdown contentId
+      toolbar.append buttonset
+      buttonset.hallobuttonset()
       buttonset.append target
       buttonset.append @_prepareButton target
-      toolbar.append buttonset
 
     _prepareDropdown: (contentId) ->
       contentArea = jQuery "<div id=\"#{contentId}\"></div>"
 
-      containingElement = @options.editable.element.get(0).tagName.toLowerCase()  
+      containingElement = @options.editable.element.get(0).tagName.toLowerCase()
 
       addElement = (element) =>
-        el = jQuery "<button class='blockselector'><#{element} class=\"menu-item\">#{element}</#{element}></button>"
+        el = jQuery "<button class='blockselector'>
+          <#{element} class=\"menu-item\">#{element}</#{element}>
+        </button>"
         
         if containingElement is element
           el.addClass 'selected'
@@ -39,13 +42,15 @@
         unless containingElement is 'div'
           el.addClass 'disabled'
 
-        el.bind 'click', =>
+        el.on 'click', =>
+          tagName = element.toUpperCase()
           if el.hasClass 'disabled'
             return
-          if jQuery.browser.msie
-            @options.editable.execute 'FormatBlock', '<'+element.toUpperCase()+'>'
-          else
-            @options.editable.execute 'formatBlock', element.toUpperCase()
+          if navigator.appName is 'Microsoft Internet Explorer'
+            # In IE FormatBlock wants tags inside brackets
+            @options.editable.execute 'FormatBlock', "<#{tagName}>"
+            return
+          @options.editable.execute 'formatBlock', tagName
           
         queryState = (event) =>
           block = document.queryCommandValue 'formatBlock'
@@ -53,14 +58,14 @@
             el.addClass 'selected'
             return
           el.removeClass 'selected'
-          
-          
-        @options.editable.element.bind 'keyup paste change mouseup', queryState
+        
+        events = 'keyup paste change mouseup'
+        @options.editable.element.on events, queryState
 
-        @options.editable.element.bind 'halloenabled', =>
-          @options.editable.element.bind 'keyup paste change mouseup', queryState
-        @options.editable.element.bind 'hallodisabled', =>
-          @options.editable.element.unbind 'keyup paste change mouseup', queryState
+        @options.editable.element.on 'halloenabled', =>
+          @options.editable.element.on events, queryState
+        @options.editable.element.on 'hallodisabled', =>
+          @options.editable.element.off events, queryState
 
         el
 

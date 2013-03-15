@@ -4,13 +4,16 @@
 #
 #     Fixed toolbar plugin
 ((jQuery) ->
-  jQuery.widget 'Hallo.halloToolbarFixed',
+  jQuery.widget 'IKS.halloToolbarFixed',
     toolbar: null
 
     options:
       parentElement: 'body'
       editable: null
       toolbar: null
+
+      affix: true
+      affixTopOffset: 2
 
     _create: ->
       @toolbar = @options.toolbar
@@ -21,11 +24,13 @@
       @_bindEvents()
 
       jQuery(window).resize (event) =>
-        @_updatePosition @_getPosition event
+        @setPosition()
+      jQuery(window).scroll (event) =>
+        @setPosition()
 
       # Make sure the toolbar has not got the full width of the editable
       # element when floating is set to true
-      if @options.parentElement is 'body' and not @options.floating
+      if @options.parentElement is 'body'
         el = jQuery(@element)
         widthToAdd = parseFloat el.css('padding-left')
         widthToAdd += parseFloat el.css('padding-right')
@@ -37,7 +42,8 @@
 
     _getPosition: (event, selection) ->
       return unless event
-      offset = parseFloat(@element.css('outline-width')) + parseFloat(@element.css('outline-offset'))
+      width = parseFloat @element.css 'outline-width'
+      offset = width + parseFloat @element.css 'outline-offset'
       return position =
         top: @element.offset().top - @toolbar.outerHeight() - offset
         left: @element.offset().left - offset
@@ -59,18 +65,32 @@
       return unless @options.parentElement is 'body'
       @toolbar.css 'position', 'absolute'
       @toolbar.css 'top', @element.offset().top - @toolbar.outerHeight()
-      @toolbar.css 'left', @element.offset().left
+
+      if @options.affix
+        scrollTop = jQuery(window).scrollTop()
+        offset = @element.offset()
+        height = @element.height()
+        topOffset = @options.affixTopOffset
+        elementTop = offset.top - (@toolbar.height() + @options.affixTopOffset)
+        elementBottom = (height - topOffset) + (offset.top - @toolbar.height())
+        
+        if scrollTop > elementTop && scrollTop < elementBottom
+          @toolbar.css('position', 'fixed')
+          @toolbar.css('top', @options.affixTopOffset)
+      else
+
+      @toolbar.css 'left', @element.offset().left - 2
 
     _updatePosition: (position) ->
       return
 
     _bindEvents: ->
       # catch activate -> show
-      @element.bind 'halloactivated', (event, data) =>
-        @_updatePosition @_getPosition event
+      @element.on 'halloactivated', (event, data) =>
+        @setPosition()
         @toolbar.show()
 
       # catch deactivate -> hide
-      @element.bind 'hallodeactivated', (event, data) =>
+      @element.on 'hallodeactivated', (event, data) =>
         @toolbar.hide()
 ) jQuery

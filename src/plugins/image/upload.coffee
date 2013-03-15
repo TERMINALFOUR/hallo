@@ -12,9 +12,10 @@
     _create: ->
       @element.html '
         <form class="upload">
-          <input type="file" class="file" name="userfile" accept="image/*" />
-          <input type="hidden" name="tags" value="" />
-          <button class="uploadSubmit">Upload</button>
+        <input type="file" class="file" name="userfile" accept="image/*" />
+        <input type="hidden" name="tags" value="" />
+        <input type="text" class="caption" name="caption" placeholder="Title" />
+        <button class="uploadSubmit">Upload</button>
         </form>
       '
     _init: ->
@@ -22,7 +23,7 @@
       if widget.options.uploadUrl and !widget.options.uploadCallback
         widget.options.uploadCallback = widget._iframeUpload
 
-      jQuery('.uploadSubmit', @element).bind 'click', (event) ->
+      jQuery('.uploadSubmit', @element).on 'click', (event) ->
         event.preventDefault()
         event.stopPropagation()
         widget.options.uploadCallback
@@ -33,11 +34,13 @@
               label: ''
 
     _prepareIframe: (widget) ->
-      iframeName = "#{widget.widgetName}_postframe_#{widget.options.uuid}".replace /-/g, '_'
+      iframeName = "#{widget.widgetName}_postframe_#{widget.options.uuid}"
+      iframeName = iframeName.replace /-/g, '_'
       iframe = jQuery "##{iframeName}"
       return iframe if iframe.length
 
-      iframe = jQuery "<iframe name=\"#{iframeName}\" id=\"#{iframeName}\" class=\"hidden\" style=\"display:none\" />"
+      iframe = jQuery "<iframe name=\"#{iframeName}\" id=\"#{iframeName}\"
+        class=\"hidden\" style=\"display:none\" />"
       @element.append iframe
       iframe.get(0).name = iframeName
       iframe
@@ -53,7 +56,7 @@
       else
         uploadUrl = widget.options.uploadUrl
 
-      iframe.bind 'load', ->
+      iframe.on 'load', ->
         imageUrl = iframe.get(0).contentWindow.location.href
         widget.element.hide()
         data.success imageUrl

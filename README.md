@@ -1,5 +1,7 @@
-Hallo - contentEditable for jQuery UI
+Hallo - contentEditable for jQuery UI [![Build Status](https://secure.travis-ci.org/bergie/hallo.png)](http://travis-ci.org/bergie/hallo)
 =====================================
+
+![Hallo Editor logo](https://raw.github.com/bergie/hallo/master/design/logo-200x59.png)
 
 Hallo is a very simple in-place rich text editor for web pages. It uses jQuery UI and the [HTML5 contentEditable functionality](https://developer.mozilla.org/en/rich-text_editing_in_mozilla) to edit web content.
 
@@ -73,6 +75,8 @@ Hallo provides some events that are useful for integration. You can use [jQuery 
 * hallolists - Adds support for ordered and unordered lists (Pick with options: "lists": {"ordered": false, "unordered": true})
 * halloreundo - Adds support for undo and redo
 * hallolink - Adds support to add links to a selection (currently not working)
+* halloimage - Image uploading, searching, suggestions
+* halloblacklist - Filtering unwanted tags from the content
 
 ## Licensing
 
@@ -80,7 +84,11 @@ Hallo is free software available under the [MIT license](http://en.wikipedia.org
 
 ## Contributing
 
-Hallo is written in [CoffeeScript](http://jashkenas.github.com/coffee-script/), a simple language that compiles into JavaScript. To generate the JavaScript code to `build/hallo.js` from Hallo sources, run CoffeeScript's [cake command](http://coffeescript.org/#cake):
+Hallo is written in [CoffeeScript](http://jashkenas.github.com/coffee-script/), a simple language that compiles into JavaScript. You'll need Node.js to to build it. All build dependencies can be installed with:
+
+    $ npm install
+
+To generate the JavaScript code to `examples/hallo.js` from Hallo sources, run CoffeeScript's [cake command](http://coffeescript.org/#cake):
 
     $ cake build
 
@@ -90,6 +98,17 @@ If you want to also generate a minified version output at `build/hallo-min.js`, 
 
 Hallo development is coordinated using Git. Just fork the [Hallo repository on GitHub](https://github.com/bergie/hallo) and [send pull requests](http://help.github.com/pull-requests/).
 
+### Unit tests
+
+We use the Travis continuous integration service for testing Hallo. Currently we run two types of tests:
+
+* [CoffeeLint](http://www.coffeelint.org/) for ensuring compliance with [coding standards](https://github.com/polarmobile/coffeescript-style-guide)
+* Some [QUnit](http://qunitjs.com/) tests
+
+You can run the unit tests locally by opening `test/index.html` in your browser, or with [PhantomJS](http://phantomjs.org/) by running:
+
+    $ npm test
+
 ### Writing plugins
 
 Hallo plugins are written as regular [jQuery UI widgets](http://semantic-interaction.org/blog/2011/03/01/jquery-ui-widget-factory/).
@@ -97,7 +116,6 @@ Hallo plugins are written as regular [jQuery UI widgets](http://semantic-interac
 When Hallo is loaded it will also load all the enabled plugins for the element, and pass them some additional options:
 
 * `editable`: The main Hallo widget instance
-* `toolbar`: Toolbar jQuery object for that Hallo instance
 * `uuid`: unique identifier of the Hallo instance, can be used for element IDs
 
 A simplistic plugin would look like the following:

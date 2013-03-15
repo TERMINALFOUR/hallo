@@ -1,5 +1,6 @@
+.idea
 docs/
 node_modules/
 docs_tmp/
 _site/
-build/
+.DS_Store
